@@ -334,7 +334,7 @@ fu! s:syntax()
 	sy match TabManAtv '\*$'
 	sy match TabManLead '[|`]-'
 	sy match TabManTag '+$'
-	sy match TabManHKey '" [^ ]*[:,]'
+	sy match TabManHKey '" \zs[^ ]*\ze[:,]'
 	sy match TabManHelp '^".*' contains=TabManHKey,TabManTName
 	hi def link TabManTName Directory
 	hi def link TabManCurTName Identifier
