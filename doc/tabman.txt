@@ -10,7 +10,7 @@
 #             888  .d888888 888  888 888  Y8P  888 .d888888 888  888          #
 #             888  888  888 888 d88P 888   "   888 888  888 888  888          #
 #             888  "Y888888 88888P"  888       888 "Y888888 888  888          #
-#                                                                       v1.0  #
+#                                                                       v1.1  #
 ===============================================================================
 CONTENTS                                                      *tabman-contents*
 
@@ -18,6 +18,7 @@ CONTENTS                                                      *tabman-contents*
     2. Options......................................|tabman-options|
     3. Commands.....................................|tabman-commands|
     4. Mappings.....................................|tabman-mappings|
+    5. Credits......................................|tabman-credits|
 
 ===============================================================================
 INTRO                                                            *tabman-intro*
@@ -44,9 +45,9 @@ mode: >
 <
 
                                                              *'g:tabman_focus'*
-Use this to change the mapping to give focus to the |TabMan| window in the
-current tab: >
-  let g:tabman_focus = '<leader>mt'
+Use this to change the mapping to open or give focus to the |TabMan| window in
+the current tab: >
+  let g:tabman_focus = '<leader>mf'
 <
 
                                                              *'g:tabman_width'*
@@ -62,6 +63,11 @@ And this to change its position: >
                                                           *'g:tabman_specials'*
 Set this to 1 to show windows created by plugins, help and quickfix: >
   let g:tabman_specials = 0
+<
+
+                                                            *'g:tabman_number'*
+Set this to 0 to disable line numbering in the |TabMan| window: >
+  let g:tabman_number = 1
 <
 
 ===============================================================================
@@ -105,7 +111,7 @@ Once inside the TabMan window:~
     Create a new tab with |TabMan| opened in it.
 
   o
-    Close all other tabs except the active one.
+    Close all other tabs except the active one (starred *).
 
   O
     Go to the tab under the cursor and close all others.
@@ -131,6 +137,15 @@ Once inside the TabMan window:~
 
   ?
     Toggle the quickhelp.
+
+  [count]<cr>,
+  [count]e,
+  [count]x,
+  [count]b,
+  [count]o,
+  [count]O,
+    [count] is the line number an item is on. If it’s given, the item on line
+    [count] will be the target of the command.
 
 ===============================================================================
 CREDITS                                                        *tabman-credits*

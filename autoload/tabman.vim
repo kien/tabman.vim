@@ -9,11 +9,14 @@ fu! s:opts()
 		\ 'g:tabman_width':    ['s:width', 25],
 		\ 'g:tabman_side':     ['s:side', 'left'],
 		\ 'g:tabman_specials': ['s:special', 0],
+		\ 'g:tabman_number':   ['s:linenr', 1],
 		\ }
 	for [ke, va] in items(opts)
-		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1]) '| unl!' ke
+		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
+	let s:width_original = s:width
 endf
+
 cal s:opts()
 
 let s:hlp =  [[
@@ -55,8 +58,11 @@ let s:hlp =  [[
 	\ '" h: move cursor to the',
 	\ '"    previous Tab# line',
 	\ '" ----------------------',
-	\ '" r: fix TabMan being',
-	\ '"    the last window',
+	\ '" r: fix TabMan window',
+	\ '" ----------------------',
+	\ '" <cr>, e, x, b, o, O:',
+	\ '"    accept line number',
+	\ '"    as [count]',
 	\ '" ======================',
 	\ ], ['" Press ? for help']]
 
@@ -78,14 +84,12 @@ let [s:maps, s:name, s:lcmap] = [{
 " Open & Close {{{
 fu! s:Open()
 	let s:bnew = 1
-	exe s:side == 'left' ? 'to' : 'bo' s:width.'vne' s:name
+	exe 'keepa' ( s:side == 'left' ? 'to' : 'bo' ) s:width.'vne' s:name
 	abc <buffer>
 	cal s:setupblank()
 	cal s:mapkeys()
 	cal s:render()
-	if has('syntax') && exists('g:syntax_on')
-		cal s:syntax()
-	en
+	cal s:width()
 	unl s:bnew
 	redr
 	ec
@@ -127,18 +131,20 @@ fu! s:ManNew()
 endf
 
 fu! s:ManOnly(...)
-	if exists('a:1')
-		cal s:ManSelect(0)
-	en
+	cal s:ManSelect(a:0)
 	tabo
-	cal s:ManUpdate(1)
+	cal s:ManUpdate(a:0 || v:prevcount ? 2 : 1)
 endf
 
 fu! s:ManDelete(...)
-	if !has_key(s:btlines, line('.'))
+	let lnr = v:prevcount ? v:prevcount : line('.')
+	if v:prevcount
+		exe 'keepj' v:prevcount
+	en
+	if !has_key(s:btlines, lnr)
 		retu
 	en
-	let eval = s:btlines[line('.')]
+	let eval = s:btlines[lnr]
 	if matchstr(eval, '^\w\ze\d\+$') == 't' && !exists('a:1')
 		try
 			exe 'tabc' matchstr(eval, '\d\+$')
@@ -161,12 +167,16 @@ fu! s:ManDelete(...)
 endf
 
 fu! s:ManSelect(...)
-	if !has_key(s:btlines, line('.'))
+	let lnr = v:prevcount || ( a:0 && !a:1 ) ? v:prevcount : line('.')
+	if v:prevcount
+		exe 'keepj' v:prevcount
+	en
+	if !has_key(s:btlines, lnr)
 		retu
 	en
-	let [eval, s:cview] = [s:btlines[line('.')], winsaveview()]
+	let [eval, s:cview] = [s:btlines[lnr], winsaveview()]
 	exe 'tabn' matchstr(eval, '^\w\zs\d\+')
-	if matchstr(eval, '\w\ze\d\+$') == 'w' && !exists('a:1')
+	if matchstr(eval, '\w\ze\d\+$') == 'w' && !a:0
 		exe matchstr(eval, '\d\+$').'winc w'
 	en
 endf
@@ -176,10 +186,10 @@ fu! s:ManRestore()
 		retu
 	en
 	if winnr('$') == 1
-		exe s:side == 'left' ? 'bo' : 'to' 'vne'
+		exe 'keepa' ( s:side == 'left' ? 'bo' : 'to' ) 'vne'
 		winc w
 	en
-	exe 'vert res' s:width
+	cal s:width()
 endf
 
 fu! s:ManUpdate(type)
@@ -247,6 +257,7 @@ fu! s:render()
 	endfo
 	let [hlg, &l:ma] = ['%#LineNr# ', 0]
 	let &l:stl = hlg.s:name.' %*%='.hlg.'Tab #'.currtab.' %*'
+	let s:save_stl = &l:stl
 	if exists('s:cview')
 		cal winrestview(s:cview)
 	en
@@ -302,9 +313,18 @@ fu! s:noupdate()
 	retu exists('s:tnew') || exists('s:snew') || exists('s:bnew') || exists('s:dnew')
 endf
 
+fu! s:width()
+	let s:width = s:width_original
+	if &l:nu
+		let &l:nuw = strlen(line('$')) + 2
+		let s:width += &l:nuw
+	en
+	exe 'vert res' s:width
+endf
+
 fu! s:mapkeys()
 	for [ke, va] in items(s:maps) | for kp in va
-		exe s:lcmap kp ':<c-u>cal <SID>'.ke.'<cr>'
+		exe s:lcmap kp '<esc>:<c-u>cal <SID>'.ke.'<cr>'
 	endfo | endfo
 	exe s:lcmap '<c-^> <Nop>'
 endf
@@ -314,11 +334,12 @@ fu! s:compval(...)
 endf
 
 fu! s:setupblank()
-	setl noswf nobl nonu nowrap nolist nospell nocuc nocul wfw
+	setl noswf nobl nowrap nolist nospell nocuc nocul wfw
 	setl fdc=0 fdl=99 tw=0 bt=nofile bh=unload
-	if v:version >= 703
+	if v:version > 702
 		setl nornu noudf cc=0
 	en
+	let [&l:ft, &l:nu] = [tolower(s:name), s:linenr]
 endf
 
 fu! s:msg(msg)
@@ -326,23 +347,6 @@ fu! s:msg(msg)
 	echoh Identifier
 	echon s:name.": ".a:msg
 	echoh None
-endf
-
-fu! s:syntax()
-	sy match TabManTName '^Tab #\d\+$\|^".*\zsTab#'
-	sy match TabManCurTName '^Tab #\d\+\ze\*$'
-	sy match TabManAtv '\*$'
-	sy match TabManLead '[|`]-'
-	sy match TabManTag '+$'
-	sy match TabManHKey '" \zs[^ ]*\ze[:,]'
-	sy match TabManHelp '^".*' contains=TabManHKey,TabManTName
-	hi def link TabManTName Directory
-	hi def link TabManCurTName Identifier
-	hi def link TabManAtv Title
-	hi def link TabManLead Special
-	hi def link TabManTag Title
-	hi def link TabManHKey Identifier
-	hi def link TabManHelp String
 endf
 
 fu! s:bufwinnr()
@@ -367,8 +371,9 @@ endf
 if has('autocmd')
 	au BufEnter TabMan cal s:ManUpdate(1)
 	au CursorMoved TabMan let s:cview = winsaveview()
+	au WinLeave,BufLeave TabMan let &l:stl = s:save_stl
 	au TabEnter,CursorHold * cal s:ManUpdate(2)
 en
 "}}}
 
-" vim:fen:fdl=0:fdc=1:ts=2:sw=2:sts=2
+" vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2

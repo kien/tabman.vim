@@ -39,6 +39,12 @@ Screenshot:
     let g:tabman_specials = 0
     ```
 
+* Set this to 0 to disable line numbering in the TabMan window:
+
+    ```vim
+    let g:tabman_number = 1
+    ```
+
 Once TabMan’s opened, press ? for help on extra keymaps.
 
 [1]: http://i.imgur.com/Hbi90.png
