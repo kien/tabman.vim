@@ -59,6 +59,8 @@ let s:hlp =  [[
 	\ '"    previous Tab# line',
 	\ '" ----------------------',
 	\ '" r: fix TabMan window',
+	\ '"',
+	\ '" <F5>: force update',
 	\ '" ----------------------',
 	\ '" <cr>, e, x, b, o, O:',
 	\ '"    accept line number',
@@ -77,6 +79,7 @@ let [s:maps, s:name, s:lcmap] = [{
 	\ 'ManJump(-1)':  ['h', '<up>'],
 	\ 'ManTab(1)':    ['<tab>', '<right>'],
 	\ 'ManTab(-1)':   ['<s-tab>', '<left>'],
+	\ 'ManUpdate(1)': ['<F5>'],
 	\ 'ManRestore()': ['r'],
 	\ 'ManHelp()':    ['?'],
 	\ }, 'TabManager', 'nn <buffer> <silent>']
@@ -90,6 +93,7 @@ fu! s:Open()
 	cal s:mapkeys()
 	cal s:render()
 	cal s:width()
+	cal s:autocmd()
 	unl s:bnew
 	redr
 	ec
@@ -352,6 +356,14 @@ fu! s:bufwinnr()
 	let tbm = filter(range(1, winnr('$')), 'bufname(winbufnr(v:val)) == s:name')
 	retu empty(tbm) ? 0 : tbm[0]
 endf
+
+fu! s:autocmd()
+	if !exists('b:done_autocmd')
+		au BufEnter <buffer> cal s:ManUpdate(1)
+		au CursorMoved <buffer> let s:cview = winsaveview()
+		let b:done_autocmd = 1
+	en
+endf
 "}}}
 " Public {{{
 fu! tabman#focus()
@@ -367,14 +379,7 @@ fu! tabman#toggle()
 	cal call(s:bufwinnr() ? 's:Close' : 's:Open', [])
 endf
 
-if has('autocmd')
-	aug TabManAug
-		au!
-		au BufEnter tabman cal s:ManUpdate(1)
-		au CursorMoved tabman let s:cview = winsaveview()
-		au TabEnter,CursorHold * cal s:ManUpdate(2)
-	aug END
-en
+au TabEnter,CursorHold * cal s:ManUpdate(2)
 "}}}
 
 " vim:fen:fdm=marker:fmr={{{,}}}:fdl=0:fdc=1:ts=2:sw=2:sts=2
