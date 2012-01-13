@@ -79,7 +79,7 @@ let [s:maps, s:name, s:lcmap] = [{
 	\ 'ManTab(-1)':   ['<s-tab>', '<left>'],
 	\ 'ManRestore()': ['r'],
 	\ 'ManHelp()':    ['?'],
-	\ }, 'TabMan', 'nn <buffer> <silent>']
+	\ }, 'TabManager', 'nn <buffer> <silent>']
 "}}}
 " Open & Close {{{
 fu! s:Open()
@@ -338,7 +338,7 @@ fu! s:setupblank()
 	if v:version > 702
 		setl nornu noudf cc=0
 	en
-	let [&l:ft, &l:nu] = [tolower(s:name), s:linenr]
+	let [&l:ft, &l:nu] = ['tabman', s:linenr]
 endf
 
 fu! s:msg(msg)
@@ -370,8 +370,8 @@ endf
 if has('autocmd')
 	aug TabManAug
 		au!
-		au BufEnter TabMan cal s:ManUpdate(1)
-		au CursorMoved TabMan let s:cview = winsaveview()
+		au BufEnter tabman cal s:ManUpdate(1)
+		au CursorMoved tabman let s:cview = winsaveview()
 		au TabEnter,CursorHold * cal s:ManUpdate(2)
 	aug END
 en
