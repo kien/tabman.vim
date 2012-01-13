@@ -47,4 +47,4 @@ Screenshot:
 
 Once TabMan’s opened, press ? for help on extra keymaps.
 
-[1]: http://i.imgur.com/Hbi90.png
+[1]: http://i.imgur.com/HnpGG.png

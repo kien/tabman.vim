@@ -257,7 +257,6 @@ fu! s:render()
 	endfo
 	let [hlg, &l:ma] = ['%#LineNr# ', 0]
 	let &l:stl = hlg.s:name.' %*%='.hlg.'Tab #'.currtab.' %*'
-	let s:save_stl = &l:stl
 	if exists('s:cview')
 		cal winrestview(s:cview)
 	en
@@ -369,10 +368,12 @@ fu! tabman#toggle()
 endf
 
 if has('autocmd')
-	au BufEnter TabMan cal s:ManUpdate(1)
-	au CursorMoved TabMan let s:cview = winsaveview()
-	au WinLeave,BufLeave TabMan let &l:stl = s:save_stl
-	au TabEnter,CursorHold * cal s:ManUpdate(2)
+	aug TabManAug
+		au!
+		au BufEnter TabMan cal s:ManUpdate(1)
+		au CursorMoved TabMan let s:cview = winsaveview()
+		au TabEnter,CursorHold * cal s:ManUpdate(2)
+	aug END
 en
 "}}}
 
