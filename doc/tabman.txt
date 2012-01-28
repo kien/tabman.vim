@@ -10,7 +10,7 @@
 #             888  .d888888 888  888 888  Y8P  888 .d888888 888  888          #
 #             888  888  888 888 d88P 888   "   888 888  888 888  888          #
 #             888  "Y888888 88888P"  888       888 "Y888888 888  888          #
-#                                                                       v1.1  #
+#                                                                       v1.2  #
 ===============================================================================
 CONTENTS                                                      *tabman-contents*
 
@@ -146,6 +146,10 @@ Once inside the TabMan window:~
   [count]O,
     [count] is the line number an item is on. If it’s given, the item on line
     [count] will be the target of the command.
+
+  [count]m[N]
+    Move the tab under the cursor to after tab page N. If [count] is given,
+    move the tab at line number [count] to after tab page N.
 
 ===============================================================================
 CREDITS                                                        *tabman-credits*

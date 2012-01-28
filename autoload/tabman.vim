@@ -14,7 +14,6 @@ fu! s:opts()
 	for [ke, va] in items(opts)
 		exe 'let' va[0] '=' string(exists(ke) ? eval(ke) : va[1])
 	endfo
-	let s:width_original = s:width
 endf
 
 cal s:opts()
@@ -41,6 +40,10 @@ let s:hlp =  [[
 	\ '" O: go to tab under the',
 	\ '"    cursor, close all',
 	\ '"    others',
+	\ '"',
+	\ '" m: move tab under the',
+	\ '"    cursor to after',
+	\ '"    another tab',
 	\ '" ----------------------',
 	\ '" <tab>,',
 	\ '" <right>:',
@@ -59,10 +62,9 @@ let s:hlp =  [[
 	\ '"    previous Tab# line',
 	\ '" ----------------------',
 	\ '" r: fix TabMan window',
-	\ '"',
-	\ '" <F5>: force update',
 	\ '" ----------------------',
-	\ '" <cr>, e, x, b, o, O:',
+	\ '" <cr>, e, x, b, o, O,',
+	\ '" m:',
 	\ '"    accept line number',
 	\ '"    as [count]',
 	\ '" ======================',
@@ -77,9 +79,9 @@ let [s:maps, s:name, s:lcmap] = [{
 	\ 'ManOnly(1)':   ['O'],
 	\ 'ManJump(1)':   ['l', '<down>'],
 	\ 'ManJump(-1)':  ['h', '<up>'],
+	\ 'ManMove()':    ['m'],
 	\ 'ManTab(1)':    ['<tab>', '<right>'],
 	\ 'ManTab(-1)':   ['<s-tab>', '<left>'],
-	\ 'ManUpdate(1)': ['<F5>'],
 	\ 'ManRestore()': ['r'],
 	\ 'ManHelp()':    ['?'],
 	\ }, 'TabManager', 'nn <buffer> <silent>']
@@ -129,7 +131,7 @@ fu! s:ManNew()
 		retu
 	en
 	let s:tnew = 1
-	tabe
+	exe tabpagenr("$").'tabe'
 	cal tabman#toggle()
 	unl s:tnew
 endf
@@ -233,6 +235,36 @@ fu! s:ManJump(dir)
 		retu
 	en | endfo
 endf
+
+fu! s:ManMove()
+	let lnr = v:prevcount ? v:prevcount : line('.')
+	if !has_key(s:btlines, lnr)
+		retu
+	en
+	let oritab = matchstr(s:btlines[lnr], '^\w\zs\d\+')
+	cal inputsave()
+	echoh MoreMsg
+	let newtab = input('Move tab #'.oritab.' to after tab number: ')
+	echoh None
+	cal inputrestore()
+	if newtab =~ '^\d\+$'
+		let [currwin, s:snew, t:tabman_currtab] = [winnr(), 1, 1]
+		let newtab = newtab > 0 ? newtab : 0
+		cal s:ManSelect()
+		exe 'tabm' newtab
+		noa tabd
+			\ if exists('t:tabman_currtab')
+			\ | let currtab = tabpagenr() |
+			\ | unl t:tabman_currtab |
+			\ en
+		exe 'tabn' currtab '|' currwin.'winc w'
+		unl s:snew
+		cal s:ManRestore()
+		cal s:ManUpdate(1)
+	en
+	redr
+	ec
+endf
 "}}}
 " Render {{{
 fu! s:render()
@@ -317,12 +349,11 @@ fu! s:noupdate()
 endf
 
 fu! s:width()
-	let s:width = s:width_original
 	if &l:nu
 		let &l:nuw = strlen(line('$')) + 2
-		let s:width += &l:nuw
+		let width = s:width + &l:nuw
 	en
-	exe 'vert res' s:width
+	exe 'vert res' ( exists('width') ? width : s:width )
 endf
 
 fu! s:mapkeys()
