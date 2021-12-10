@@ -208,9 +208,9 @@ fu! s:ManUpdate(type)
 		let winnr = s:bufwinnr()
 		if winnr > 0
 			let currwin = winnr()
-			exe winnr.'winc w'
+			silent! exe winnr.'winc w'
 			cal s:ManUpdate(1)
-			exe currwin.'winc w'
+			silent! exe currwin.'winc w'
 		en
 	en
 endf
