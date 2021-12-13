@@ -14,5 +14,9 @@ if !exists('g:tabman_toggle') | let g:tabman_toggle = '<leader>mt' | en
 com! TMFocus  cal tabman#focus()
 com! TMToggle cal tabman#toggle()
 
-exe 'nn <silent>' g:tabman_focus  ':<c-u>TMFocus<cr>'
-exe 'nn <silent>' g:tabman_toggle ':<c-u>TMToggle<cr>'
+exe 'nn  <silent>'           g:tabman_focus            ':<c-u>TMFocus'  . '<cr>'
+exe 'nn  <silent>' '<c-w>' . g:tabman_focus            ':<c-u>TMFocus'  . '<cr>'
+exe 'tno <silent>'           g:tabman_focus  '<c-w>' . ':<c-u>TMFocus'  . '<cr>'
+exe 'nn  <silent>'           g:tabman_toggle           ':<c-u>TMToggle' . '<cr>'
+exe 'nn  <silent>' '<c-w>' . g:tabman_toggle           ':<c-u>TMToggle' . '<cr>'
+exe 'tno <silent>'           g:tabman_toggle '<c-w>' . ':<c-u>TMToggle' . '<cr>'
