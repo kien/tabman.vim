@@ -285,11 +285,19 @@ fu! s:render()
 		cal setline(lnr, ['', 'Tab #'.(key == currtab ? key.'*' : key)])
 		cal extend(s:btlines, { lnr + 1 : 't'.key })
 		let lnr += 2
+		let l:btlines = []
 		for each in keys(buftabs[key]) | for winnr in buftabs[key][each][1:]
+			let l:btlines += [{ 'each' : each, 'winnr' : winnr }]
+		endfor | endfor
+		cal sort(l:btlines, { a, b -> a.winnr - b.winnr })
+		for l:line in l:btlines
+			let each = l:line.each
+			let winnr = l:line.winnr
 			cal setline(lnr, [(id == tlen ? '`' : '|')."-".buftabs[key][each][0]])
 			cal extend(s:btlines, { lnr : 't'.key.'b'.each.'w'.winnr })
 			let [lnr, id] += [1, 1]
-		endfo | endfo
+		endfor
+		unl l:btlines l:line
 	endfo
 	let [hlg, &l:ma] = ['%#LineNr# ', 0]
 	let &l:stl = hlg.s:name.' %*%='.hlg.'Tab #'.currtab.' %*'
