@@ -312,8 +312,10 @@ endf
 fu! s:validbufs(bufs)
 	let bufs = {}
 	for each in a:bufs
-		let bufname = empty(bufname(each)) ? '<no name>'
-			\ : getbufvar(each, '&bt') == 'quickfix' ? 'quickfix' : bufname(each)
+		let bufname = bufname(each)
+		if empty(bufname)
+			let bufname = getbufvar(each, '&bt') == 'quickfix' ? 'quickfix' : '<no name>'
+		en
 		if (getbufvar(each, '&bl') && !empty(bufname(each))
 			\ && empty(getbufvar(each, '&bt')) && getbufvar(each, '&ma')) || s:special
 			let mod = getbufvar(each, '&mod') ? '+' : ''
