@@ -161,8 +161,13 @@ fu! s:ManDelete(...)
 		if exists('a:1')
 			exe 'bd' matchstr(eval, '\d\+\ze\w\d\+$')
 		el
-			let [currtab, currwin, s:snew] = [tabpagenr(), winnr(), 1]
+			let [currtab, currwin, lasttab, s:snew] = [tabpagenr(), winnr(), tabpagenr('$'), 1]
 			cal s:ManSelect()
+			if tabpagenr() < currtab && tabpagenr('$') < lasttab
+				let currtab -= 1
+			elseif tabpagenr() == currtab && winnr() <= currwin
+				let currwin -= 1
+			en
 			clo
 			exe 'tabn' currtab '|' currwin.'winc w'
 			unl s:snew
