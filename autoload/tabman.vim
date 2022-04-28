@@ -290,6 +290,7 @@ fu! s:render()
 			let l:btlines += [{ 'each' : each, 'winnr' : winnr }]
 		endfor | endfor
 		cal sort(l:btlines, { a, b -> a.winnr - b.winnr })
+		let l:line = v:null
 		for l:line in l:btlines
 			let each = l:line.each
 			let winnr = l:line.winnr
