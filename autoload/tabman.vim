@@ -285,7 +285,10 @@ fu! s:render()
 		cal setline(lnr, ['', 'Tab #'.(key == currtab ? key.'*' : key)])
 		cal extend(s:btlines, { lnr + 1 : 't'.key })
 		let lnr += 2
-		cal setline(lnr, ['| ['.fnamemodify(getcwd(-1, key), ':t').']'])
+		let l:sep = has('win32') ? '\' : '/'
+		let l:path = split(getcwd(-1, key), l:sep, v:true)
+		let l:path = join(map(l:path, 'v:key == len(l:path) - 1 ? v:val : v:val[0]'), '/')
+		cal setline(lnr, ['| ['.l:path.']'])
 		let lnr += 1
 		for each in keys(buftabs[key]) | for winnr in buftabs[key][each][1:]
 			cal setline(lnr, [(id == tlen ? '`' : '|')."-".buftabs[key][each][0]])
