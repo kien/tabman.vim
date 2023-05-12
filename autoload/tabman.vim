@@ -285,6 +285,8 @@ fu! s:render()
 		cal setline(lnr, ['', 'Tab #'.(key == currtab ? key.'*' : key)])
 		cal extend(s:btlines, { lnr + 1 : 't'.key })
 		let lnr += 2
+		cal setline(lnr, ['| ['.pathshorten(getcwd(-1, key), 1).']'])
+		let lnr += 1
 		for each in keys(buftabs[key]) | for winnr in buftabs[key][each][1:]
 			cal setline(lnr, [(id == tlen ? '`' : '|')."-".buftabs[key][each][0]])
 			cal extend(s:btlines, { lnr : 't'.key.'b'.each.'w'.winnr })
