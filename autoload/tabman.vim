@@ -287,7 +287,7 @@ fu! s:render()
 		let lnr += 2
 		let l:sep = has('win32') ? '\' : '/'
 		let l:path = split(getcwd(-1, key), l:sep, v:true)
-		let l:path = join(map(l:path, 'v:key == len(l:path) - 1 ? v:val : slice(v:val, 0, v:val[0] ==# "." ? 2 : 1)'), '/')
+		let l:path = join(map(l:path, 'v:key == len(l:path) - 1 ? v:val : v:val[0]'), '/')
 		cal setline(lnr, ['| ['.l:path.']'])
 		let lnr += 1
 		for each in keys(buftabs[key]) | for winnr in buftabs[key][each][1:]
